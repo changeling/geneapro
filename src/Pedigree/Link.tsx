@@ -45,39 +45,40 @@ export default function PedigreeLink(props: PedigreeLinkProps) {
 
    switch (props.style.links) {
       case LinkStyle.STRAIGHT:
-         d = 'M' + source + 'L' + target;
+         d = 'M ' + source + ' L ' + target;
          break;
 
       case LinkStyle.ORTHOGONAL:
          d = vertical ?
-            ('M' + source + 'V' + (target[1] + Math.sign(source[1] - target[1]) * 5) +
-              'H' + target[0] + 'V' + target[1]) :
-            ('M' + source + 'H' + (target[0]  + Math.sign(source[0] - target[0]) * 5) +
-              'V' + target[1] + 'H' + target[0]);
+            ('M ' + source + ' V ' + (target[1] + Math.sign(source[1] - target[1]) * 5) +
+              ' H ' + target[0] + ' V ' + target[1]) :
+            ('M ' + source + ' H ' + (target[0]  + Math.sign(source[0] - target[0]) * 5) +
+              ' V ' + target[1] + ' H ' + target[0]);
          break;
 
       default:  // CURVE
          d = vertical ?
-            ('M' + source +
-               'C' + source[0] + ',' + (source[1] + target[1]) / 2 +
-               ' ' + target[0] + ',' + (source[1] + target[1]) / 2 +
+            ('M ' + source +
+               ' C ' + source[0] + ', ' + (source[1] + target[1]) / 2 +
+               ' ' + target[0] + ', ' + (source[1] + target[1]) / 2 +
                ' ' + target) :
-            ('M' + source +
-               'C' + (source[0] + target[0]) / 2 + ',' + source[1] +
-               ' ' + (source[0] + target[0]) / 2 + ',' + target[1] +
+            ('M ' + source +
+               ' C ' + (source[0] + target[0]) / 2 + ', ' + source[1] +
+               ' ' + (source[0] + target[0]) / 2 + ', ' + target[1] +
                ' ' + target);
    }
 
    if (props.style.colors === NO_BOX.id) {
       d += vertical ?
-         'M' + source + 'v-5' :
-         'M' + source + 'h' + (-props.from.w);
+         ' M ' + source + ' v -5' :
+         ' M ' + source + ' h ' + (-props.from.w);
    }
 
    return (
-      <path
-         className="link"
-         d={d}
+    <path
+        className="link"
+        fill="none"
+        d={d}
       />
    );
 }
