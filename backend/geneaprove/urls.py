@@ -10,15 +10,13 @@ from django.template.context_processors import csrf
 import django.views
 from .views import count
 from .views import events
-from .views import graph
 from .views import importers
-from .views import merge
 from .views import metadata
 from .views import pedigree
 from .views import persona
 from .views import places
+from .views import quilts
 from .views import representation
-from .views import rules
 from .views import sources
 from .views import stats
 from .views import themelist
@@ -71,7 +69,6 @@ urlpatterns = [
     url(r'^data/sources/(\d+)/delRepr/(\d+)', sources.DelSourceRepr.as_view()),
     url(r'^data/suretySchemes$', persona.SuretySchemesList.as_view()),
     url(r'^data/event/(\d+)$', events.EventDetailsView.as_view()),
-    url(r'^data/legend$', rules.getLegend),
     url(r'^data/stats/count$', count.CountView.as_view()),
     url(r'^data/stats/(?P<id>\d+)$', stats.StatsView.as_view()),
     url(r'^data/metadata$', metadata.MetadataList.as_view()),
@@ -82,10 +79,9 @@ urlpatterns = [
     url(r'^data/citationModel/(?P<model_id>.+)$',
         sources.CitationModel.as_view()),
     url(r'^data/citationModels$', sources.CitationModels.as_view()),
-    url(r'^data/settings', persona.GlobalSettings.as_view()),
     url(r'^data/repr/(?P<id>\d+)(?:/(?P<size>\d+))?$',
         representation.view),
-    url(r'^data/quilts/(?P<id>\d+)$', graph.QuiltsView.as_view()),
+    url(r'^data/quilts/(?P<id>\d+)$', quilts.QuiltsView.as_view()),
 
     # Getting the CSRF token
     url(r'^data/csrf', send_csrf),
@@ -94,6 +90,4 @@ urlpatterns = [
     # url(r'^.*', static, name='index'),
 
     # url(r'^merge$', geneaprove.views.merge.view),
-
-    url(r'^admin', django.contrib.admin.site.urls),
 ]

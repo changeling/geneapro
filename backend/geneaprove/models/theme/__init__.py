@@ -1,6 +1,6 @@
 from django.db import models
 from ..base import GeneaProveModel
-from .checks import build_check, check_choices, checks_list
+from .checks import Checker
 from .rules import RuleChecker
 from .styles import Style
 
@@ -31,6 +31,7 @@ class Rule(GeneaProveModel):
     One specific rule within a theme
     """
 
+
     theme = models.ForeignKey(
         Theme, related_name="rules", on_delete=models.CASCADE)
     type = models.TextField(help_text="Type oof rule")
@@ -56,7 +57,14 @@ class Rule(GeneaProveModel):
         db_table = "rule"
 
     def __str__(self):
-        return f"(Rule name={self.name})"
+        return (
+            f"(Rule name={self.name} type={self.type}"
+            f" seq={self.sequence_number}"
+            f" fill={self.style_fill}"
+            f" color={self.style_color}"
+            f" stroke={self.style_stroke}"
+            f" font={self.style_font_weight})"
+        )
 
     def to_json(self):
         return {
@@ -66,8 +74,9 @@ class Rule(GeneaProveModel):
             'color': self.style_color,
             'stroke': self.style_stroke,
             'fontWeight': self.style_font_weight,
-            'parts': {p.field: {'operator': p.operator, 'value': p.value}
-                      for p in self.parts.all()},
+
+            # ??? Should send a list and let front-end deal with dict
+            'parts': {p.field: p for p in self.parts.all()},
             'children': self.children.all(),
         }
 
@@ -83,8 +92,7 @@ class Rule(GeneaProveModel):
             kwargs["rules"] = children
 
         for part in self.parts.all():
-            kwargs[part.field] = build_check(
-                operator=part.operator, value=part.value)
+            kwargs[part.field] = Checker.build_check(part)
 
         return RuleChecker.get_factory(self.type)(
             descr=self.name,
@@ -105,6 +113,12 @@ class RulePart(GeneaProveModel):
 
     field = models.TextField(
         help_text="What we are testing, for instance 'name'")
-    operator = models.TextField(max_length=10, choices=check_choices)
+    operator = models.TextField(max_length=10, choices=Checker.DJANGO_CHOICES)
     value = models.TextField(
         help_text="What it should match (either a string or a list)")
+
+    def to_json(self):
+        return Checker.part_to_json(self)
+
+    def __str__(self):
+        return f"(RulePart {self.field} {self.operator} {self.value})"

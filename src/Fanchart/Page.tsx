@@ -1,90 +1,90 @@
-import * as React from 'react';
-import { connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
-import { Loader } from 'semantic-ui-react';
-import * as GP_JSON from '../Server/JSON';
-import { Person, PersonSet, personDisplay } from '../Store/Person';
-import { addToHistory } from '../Store/History';
-import { FanchartSettings, changeFanchartSettings } from '../Store/Fanchart';
-import { fetchPedigree } from '../Store/Sagas';
-import { AppState, GPDispatch, themeNameGetter } from '../Store/State';
-import { GenealogyEventSet } from '../Store/Event';
-import Page from '../Page';
-import FanchartSide from '../Fanchart/Side';
-import FanchartLayout from '../Fanchart/Layout';
+import * as React from "react";
+import { connect } from "react-redux";
+import { RouteComponentProps } from "react-router";
+import { Loader } from "semantic-ui-react";
+import * as GP_JSON from "../Server/JSON";
+import { Person, PersonSet, personDisplay } from "../Store/Person";
+import { addToHistory } from "../Store/History";
+import { FanchartSettings, changeFanchartSettings } from "../Store/Fanchart";
+import { fetchPedigree } from "../Store/Sagas";
+import { AppState, GPDispatch, themeNameGetter } from "../Store/State";
+import { GenealogyEventSet } from "../Store/Event";
+import Page from "../Page";
+import FanchartSide from "../Fanchart/Side";
+import FanchartLayout from "../Fanchart/Layout";
 
 interface PropsFromRoute {
    id: string;
 }
 
-interface FanchartPageConnectedProps extends RouteComponentProps<PropsFromRoute> {
+interface FanchartPageConnectedProps
+   extends RouteComponentProps<PropsFromRoute> {
    settings: FanchartSettings;
    persons: PersonSet;
    allEvents: GenealogyEventSet;
-   onChange: (diff: Partial<FanchartSettings>) => void;
    dispatch: GPDispatch;
-   decujusid: number;
-
    themeNameGet: (id: GP_JSON.ColorSchemeId) => string;
 }
 
-class FanchartPageConnected extends React.PureComponent<FanchartPageConnectedProps> {
-   componentDidMount() {
-      this.calculateData();
-   }
+const FanchartPageConnected: React.FC<FanchartPageConnectedProps> = p => {
+   const decujusid = Number(p.match.params.id);
+   const decujus: Person = p.persons[decujusid];
 
-   componentDidUpdate(old: FanchartPageConnectedProps) {
-      this.calculateData();
+   React.useEffect(
+      () =>
+         fetchPedigree.execute(p.dispatch, {
+            decujus: decujusid,
+            ancestors: p.settings.ancestors,
+            descendants: p.settings.descendants,
+            theme: p.settings.colors
+         }),
+      [
+         decujusid,
+         p.settings.ancestors,
+         p.settings.descendants,
+         p.settings.colors
+      ]
+   );
 
-      const decujus: Person = this.props.persons[this.props.decujusid];
-      this.props.dispatch(addToHistory({person: decujus}));
-   }
+   React.useEffect(() => {
+      document.title = "Fanchart for " + personDisplay(decujus);
+      p.dispatch(addToHistory({ person: decujus }));
+   }, [decujus, p.dispatch]);
 
-   calculateData() {
-      // will do nothing if we already have data
-      fetchPedigree.execute(
-         this.props.dispatch,
-         {
-            decujus: this.props.decujusid,
-            ancestors: this.props.settings.ancestors,
-            descendants: this.props.settings.descendants,
-            theme: this.props.settings.colors,
-         });
-   }
-
-   render() {
-      const decujus: Person = this.props.persons[this.props.decujusid];
-
-      if (decujus) {
-         document.title = 'Fanchart for ' + personDisplay(decujus);
-      }
-
-      const main = this.props.settings.loading || !decujus ? (
-            <Loader active={true} size="large">Loading</Loader>
-         ) : (
-            <FanchartLayout
-               settings={this.props.settings}
-               persons={this.props.persons}
-               allEvents={this.props.allEvents}
-               decujus={this.props.decujusid}
-            />
-         );
-
-      return (
-         <Page
-            decujus={decujus}
-            leftSide={
-               <FanchartSide
-                  settings={this.props.settings}
-                  onChange={this.props.onChange}
-                  themeNameGet={this.props.themeNameGet}
-               />
-            }
-            main={main}
+   const main =
+      p.settings.loading || !decujus ? (
+         <Loader active={true} size="large">
+            Loading
+         </Loader>
+      ) : (
+         <FanchartLayout
+            settings={p.settings}
+            persons={p.persons}
+            allEvents={p.allEvents}
+            decujus={decujusid}
          />
       );
-   }
-}
+
+   const onChange = React.useCallback(
+      (diff: Partial<FanchartSettings>) =>
+         p.dispatch(changeFanchartSettings({ diff })),
+      [p.dispatch]
+   );
+
+   return (
+      <Page
+         decujus={decujus}
+         leftSide={
+            <FanchartSide
+               settings={p.settings}
+               onChange={onChange}
+               themeNameGet={p.themeNameGet}
+            />
+         }
+         main={main}
+      />
+   );
+};
 
 const FanchartPage = connect(
    (state: AppState, props: RouteComponentProps<PropsFromRoute>) => ({
@@ -92,15 +92,11 @@ const FanchartPage = connect(
       settings: state.fanchart,
       persons: state.persons,
       allEvents: state.events,
-      decujusid: Number(props.match.params.id),
-      themeNameGet: themeNameGetter(state),
+      themeNameGet: themeNameGetter(state)
    }),
    (dispatch: GPDispatch) => ({
-      dispatch,
-      onChange: (diff: Partial<FanchartSettings>) => {
-         dispatch(changeFanchartSettings({diff}));
-      },
-   }),
+      dispatch
+   })
 )(FanchartPageConnected);
 
 export default FanchartPage;

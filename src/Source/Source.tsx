@@ -1,14 +1,13 @@
-import * as React from 'react';
-import { Accordion, AccordionTitleProps, Icon,
-         Segment, Step } from 'semantic-ui-react';
-import { Source } from '../Store/Source';
-import SourceCitation from '../Source/Citation';
-import SourceMedias from '../Source/Media';
-import SourceAssertions from '../Source/Assertions';
-import './Source.css';
+import * as React from "react";
+import { Accordion, Icon, Segment, Step } from "semantic-ui-react";
+import { Source } from "../Store/Source";
+import SourceCitation from "../Source/Citation";
+import SourceMedias from "../Source/Media";
+import SourceAssertions from "../Source/Assertions";
+import "./Source.css";
 
 interface SourceProps {
-   source: Source|undefined;
+   source: Source | undefined;
 }
 
 interface SourceState {
@@ -18,49 +17,53 @@ interface SourceState {
    showAssertions: boolean;
 }
 
-export default class SourceDetails extends React.PureComponent<SourceProps, SourceState> {
-   state: SourceState = {
+export default class SourceDetails extends React.PureComponent<
+   SourceProps,
+   SourceState
+> {
+   public state: SourceState = {
       title: undefined,
       showCitation: false,
       showMedia: true,
-      showAssertions: true,
+      showAssertions: true
    };
 
-   static getDerivedStateFromProps(nextProps: SourceProps, prevState: SourceState) {
-      return {...prevState,
-              showCitation: !nextProps.source || !nextProps.source.title,
+   public static getDerivedStateFromProps(
+      nextProps: SourceProps,
+      prevState: SourceState
+   ) {
+      return {
+         ...prevState,
+         showCitation: !nextProps.source || !nextProps.source.title
       };
    }
 
-   toggleCitation = (e: Event|React.SyntheticEvent,
-                     props2: AccordionTitleProps) => {
+   public toggleCitation = () => {
       const show = !this.state.showCitation;
-      this.setState({showCitation: show});
-   }
+      this.setState({ showCitation: show });
+   };
 
-   toggleMedia = (e: Event|React.SyntheticEvent,
-                  props2: AccordionTitleProps) => {
+   public toggleMedia = () => {
       const show = !this.state.showMedia;
-      this.setState({showMedia: show});
-   }
+      this.setState({ showMedia: show });
+   };
 
-   toggleAssertions = (e: Event|React.SyntheticEvent,
-                       props2: AccordionTitleProps) => {
+   public toggleAssertions = () => {
       const show = !this.state.showAssertions;
-      this.setState({showAssertions: show});
-   }
+      this.setState({ showAssertions: show });
+   };
 
-   onTitleChanged = (title: JSX.Element | JSX.Element[]) => {
-      this.setState({title: title});
-   }
+   public onTitleChanged = (title: JSX.Element | JSX.Element[]) => {
+      this.setState({ title: title });
+   };
 
-   render() {
+   public render() {
       const s = this.props.source;
       const step: number = !s ? 1 : 2;
       const step1Complete = !!s;
       const step2Complete = s && s.medias && s.medias.length > 0;
       const step3Complete = s && s.asserts && s.asserts.get().length > 0;
-      const step4Complete = step3Complete;  //  ??? Incorrect
+      const step4Complete = step3Complete; //  ??? Incorrect
       const allStepsComplete =
          step1Complete && step2Complete && step3Complete && step4Complete;
 
@@ -70,12 +73,15 @@ export default class SourceDetails extends React.PureComponent<SourceProps, Sour
                {this.state.title || <span>&nbsp;</span>}
             </Segment>
 
-            {
-               !allStepsComplete &&
+            {!allStepsComplete && (
                <Segment attached={true}>
-                  {step > 4 ?
-                     null :
-                     <Step.Group ordered={true} stackable="tablet" fluid={true} size="mini">
+                  {step > 4 ? null : (
+                     <Step.Group
+                        ordered={true}
+                        stackable="tablet"
+                        fluid={true}
+                        size="mini"
+                     >
                         <Step
                            completed={step1Complete}
                            active={!s}
@@ -104,25 +110,19 @@ export default class SourceDetails extends React.PureComponent<SourceProps, Sour
                            description="what the source says"
                         />
                      </Step.Group>
-                  }
+                  )}
                </Segment>
-            }
+            )}
 
-            <Accordion
-               styled={true}
-               fluid={true}
-               style={{marginTop: '10px'}}
-            >
+            <Accordion styled={true} fluid={true} style={{ marginTop: "10px" }}>
                <Accordion.Title
-                   active={this.state.showCitation}
-                   onClick={this.toggleCitation}
+                  active={this.state.showCitation}
+                  onClick={this.toggleCitation}
                >
                   <Icon name="dropdown" />
                   Citation
                </Accordion.Title>
-               <Accordion.Content
-                  active={this.state.showCitation}
-               >
+               <Accordion.Content active={this.state.showCitation}>
                   <SourceCitation
                      source={s}
                      onTitleChanged={this.onTitleChanged}
@@ -130,52 +130,44 @@ export default class SourceDetails extends React.PureComponent<SourceProps, Sour
                </Accordion.Content>
             </Accordion>
 
-            {
-               s ? (
-                  <Accordion
-                     styled={true}
-                     fluid={true}
-                     style={{marginTop: '10px'}}
+            {s ? (
+               <Accordion
+                  styled={true}
+                  fluid={true}
+                  style={{ marginTop: "10px" }}
+               >
+                  <Accordion.Title
+                     active={this.state.showMedia}
+                     onClick={this.toggleMedia}
                   >
-                     <Accordion.Title
-                         active={this.state.showMedia}
-                         onClick={this.toggleMedia}
-                     >
-                        <Icon name="dropdown" />
-                        Media
-                     </Accordion.Title>
-                     <Accordion.Content
-                         active={this.state.showMedia}
-                     >
-                        <SourceMedias source={s} />
-                     </Accordion.Content>
-                  </Accordion>
-               ) : null
-            }
+                     <Icon name="dropdown" />
+                     Media
+                  </Accordion.Title>
+                  <Accordion.Content active={this.state.showMedia}>
+                     <SourceMedias source={s} />
+                  </Accordion.Content>
+               </Accordion>
+            ) : null}
 
-            {
-               s ? (
-                  <Accordion
-                     styled={true}
-                     fluid={true}
-                     style={{marginTop: '10px'}}
-                     className="pageContent"
+            {s ? (
+               <Accordion
+                  styled={true}
+                  fluid={true}
+                  style={{ marginTop: "10px" }}
+                  className="pageContent"
+               >
+                  <Accordion.Title
+                     active={this.state.showAssertions}
+                     onClick={this.toggleAssertions}
                   >
-                     <Accordion.Title
-                         active={this.state.showAssertions}
-                         onClick={this.toggleAssertions}
-                     >
-                        <Icon name="dropdown" />
-                        Assertions
-                     </Accordion.Title>
-                     <Accordion.Content
-                         active={this.state.showAssertions}
-                     >
-                        <SourceAssertions source={s} />
-                     </Accordion.Content>
-                  </Accordion>
-               ) : null
-            }
+                     <Icon name="dropdown" />
+                     Assertions
+                  </Accordion.Title>
+                  <Accordion.Content active={this.state.showAssertions}>
+                     <SourceAssertions source={s} />
+                  </Accordion.Content>
+               </Accordion>
+            ) : null}
          </div>
       );
    }

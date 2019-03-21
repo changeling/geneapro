@@ -1,5 +1,5 @@
-import { GenealogyEventSet } from '../Store/Event';
-import { SourceMedia } from '../Store/Source';
+import { GenealogyEventSet } from "../Store/Event";
+import { SourceMedia } from "../Store/Source";
 
 export interface CharacteristicPart {
    name: string;
@@ -8,31 +8,31 @@ export interface CharacteristicPart {
 
 export interface Characteristic {
    date?: string;
-   date_sort?: string|null;
+   date_sort?: string | null;
    name: string;
-   placeId?: number;  // points to a Place in the state
+   placeId?: number; // points to a Place in the state
    parts: CharacteristicPart[];
 
-   medias?: SourceMedia[];  // Only set when name == "image"
+   medias?: SourceMedia[]; // Only set when name == "image"
 }
 
 export abstract class Assertion {
-   constructor(
-      public id:          number,
-      public surety:      number,
-      public researcher:  number,  // xref
-      public rationale:   string,
-      public disproved:   boolean,
+   public constructor(
+      public id: number,
+      public surety: number,
+      public researcher: number, // xref
+      public rationale: string,
+      public disproved: boolean,
       public lastChanged: Date,
-      public sourceId?:   number   // points to a Source in the state
-   ) {
-   }
+      public sourceId?: number // points to a Source in the state
+   ) {}
 
    /**
     * Return the sort order for timelines. The format of the date should
     * be ISO: yyyy-mm-dd
     */
-   getSortDate(events: GenealogyEventSet): string|null {
+   public getSortDate(events: GenealogyEventSet): string | null {
+      // eslint-disable-line @typescript-eslint/no-unused-vars
       return null;
    }
 
@@ -40,129 +40,161 @@ export abstract class Assertion {
     * Return a key to use when sorting assertions. This is the secondary key
     * in timelines, where the dates have been checked first
     */
-   abstract getSortKey(events: GenealogyEventSet): string;
-
+   public abstract getSortKey(events: GenealogyEventSet): string;
 }
 
 export class P2P extends Assertion {
-   constructor(
-      public id:          number,
-      public surety:      number,
-      public researcher:  number,  // xref
-      public rationale:   string,
-      public disproved:   boolean,
+   public constructor(
+      public id: number,
+      public surety: number,
+      public researcher: number, // xref
+      public rationale: string,
+      public disproved: boolean,
       public lastChanged: Date,
-      public person1Id:   number,  // points to a Persona in the state
-      public person2Id:   number,  // points to a Persona in the state
-      public relation:    string,  // type of relationship
-      public sourceId?:   number   // points to a Source in the state
-   )  {
-      super(id, surety, researcher, rationale, disproved, lastChanged, sourceId);
+      public person1Id: number, // points to a Persona in the state
+      public person2Id: number, // points to a Persona in the state
+      public relation: string, // type of relationship
+      public sourceId?: number // points to a Source in the state
+   ) {
+      super(
+         id,
+         surety,
+         researcher,
+         rationale,
+         disproved,
+         lastChanged,
+         sourceId
+      );
    }
 
    /** overriding */
-   getSortKey(_: GenealogyEventSet): string {
-      return 'same as';
+   public getSortKey(): string {
+      return "same as";
    }
 }
 
 export class P2G extends Assertion {
-   constructor(
-      public id:          number,
-      public surety:      number,
-      public researcher:  number,  // xref
-      public rationale:   string,
-      public disproved:   boolean,
+   public constructor(
+      public id: number,
+      public surety: number,
+      public researcher: number, // xref
+      public rationale: string,
+      public disproved: boolean,
       public lastChanged: Date,
-      public personId:    number,  // points to a Persona in the state
-      public groupId:     number,  // points to a Group in the state
-      public sourceId?:   number   // points to a Source in the state
-   )  {
-      super(id, surety, researcher, rationale, disproved, lastChanged, sourceId);
+      public personId: number, // points to a Persona in the state
+      public groupId: number, // points to a Group in the state
+      public sourceId?: number // points to a Source in the state
+   ) {
+      super(
+         id,
+         surety,
+         researcher,
+         rationale,
+         disproved,
+         lastChanged,
+         sourceId
+      );
    }
 
    /** overriding */
-   getSortKey(_: GenealogyEventSet): string {
-      return 'group';
+   public getSortKey(): string {
+      return "group";
    }
 }
 
 export class P2C extends Assertion {
-   constructor(
-      public id:             number,
-      public surety:         number,
-      public researcher:     number,  // xref
-      public rationale:      string,
-      public disproved:      boolean,
-      public lastChanged:    Date,
-      public personId:       number,  // points to a Persona in the state
+   public constructor(
+      public id: number,
+      public surety: number,
+      public researcher: number, // xref
+      public rationale: string,
+      public disproved: boolean,
+      public lastChanged: Date,
+      public personId: number, // points to a Persona in the state
       public characteristic: Characteristic,
-      public sourceId?:      number   // points to a Source in the state
-   )  {
-      super(id, surety, researcher, rationale, disproved, lastChanged, sourceId);
+      public sourceId?: number // points to a Source in the state
+   ) {
+      super(
+         id,
+         surety,
+         researcher,
+         rationale,
+         disproved,
+         lastChanged,
+         sourceId
+      );
    }
 
    /** overriding */
-   getSortDate(_: GenealogyEventSet): string|null {
+   public getSortDate(): string | null {
       return this.characteristic.date_sort || null;
    }
 
    /** overriding */
-   getSortKey(_: GenealogyEventSet): string {
+   public getSortKey(): string {
       return this.characteristic.name;
    }
 }
 
 export class P2E extends Assertion {
-   constructor(
-      public id:          number,
-      public surety:        number,
-      public researcher:    number,  // xref
-      public rationale:     string,
-      public disproved:     boolean,
-      public lastChanged:   Date,
-      public personId:      number,  // points to a Persona in the state
-      public eventId:       number,  // points to a GenealogyEvent in the state
-      public role:          string,
-      public sourceId?:     number   // points to a Source in the state
-   )  {
-      super(id, surety, researcher, rationale, disproved, lastChanged, sourceId);
+   public constructor(
+      public id: number,
+      public surety: number,
+      public researcher: number, // xref
+      public rationale: string,
+      public disproved: boolean,
+      public lastChanged: Date,
+      public personId: number, // points to a Persona in the state
+      public eventId: number, // points to a GenealogyEvent in the state
+      public role: string,
+      public sourceId?: number // points to a Source in the state
+   ) {
+      super(
+         id,
+         surety,
+         researcher,
+         rationale,
+         disproved,
+         lastChanged,
+         sourceId
+      );
    }
 
    /** overriding */
-   getSortDate(events: GenealogyEventSet): string|null {
+   public getSortDate(events: GenealogyEventSet): string | null {
       const e = events[this.eventId];
       return e ? e.date_sort || null : null;
    }
 
    /** overriding */
-   getSortKey(events: GenealogyEventSet): string {
+   public getSortKey(events: GenealogyEventSet): string {
       const e = events[this.eventId];
-      return e && e.type ? e.type.name : '';
+      return e && e.type ? e.type.name : "";
    }
 }
 
 export class AssertionList {
-   constructor(private asserts: Assertion[]) {
-   }
+   public constructor(private asserts: Assertion[]) {}
 
-   get(): Assertion[] {
+   public get(): Assertion[] {
       return this.asserts;
    }
 
-   sortStrings(s1: string|null, s2: string|null): number {
-      return !s1 ? (!s2 ? 0 : -1) :
-             !s2 ?  1 :
-             s1.localeCompare(s2);
+   public sortStrings(s1: string | null, s2: string | null): number {
+      return !s1 ? (!s2 ? 0 : -1) : !s2 ? 1 : s1.localeCompare(s2);
    }
 
-   sortByDate(events: GenealogyEventSet) {
+   public sortByDate(events: GenealogyEventSet) {
       this.asserts.sort((a, b) => {
          let result = this.sortStrings(
-            a.getSortDate(events), b.getSortDate(events));
+            a.getSortDate(events),
+            b.getSortDate(events)
+         );
          if (result === 0) {
             result = this.sortStrings(
-               a.getSortKey(events), b.getSortKey(events));
+               a.getSortKey(events),
+               b.getSortKey(events)
+            );
          }
          if (result === 0) {
             //  Keep stable sort

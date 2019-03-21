@@ -1,13 +1,14 @@
-import * as GP_JSON from '../Server/JSON';
-import * as Server from '../Server/Post';
+import * as GP_JSON from "../Server/JSON";
+import * as Server from "../Server/Post";
 
-export interface OperatorValue {
+export interface RulePart {
+   field: string;
    operator: GP_JSON.OperatorString;
-   value: string;
+   value: string | number | boolean | (string | number | boolean)[] | undefined;
 }
 
 export interface RuleParts {
-   [field: string]: OperatorValue;
+   [field: string]: RulePart;
 }
 
 export interface NestedThemeRule {
@@ -20,10 +21,10 @@ export interface NestedThemeRule {
 // do not have theme.
 export interface ThemeRule extends NestedThemeRule {
    name: string;
-   fill: string|null;
-   color: string|null;
-   stroke: string|null;
-   fontWeight: GP_JSON.FontWeight|null;
+   fill: string | null;
+   color: string | null;
+   stroke: string | null;
+   fontWeight: GP_JSON.FontWeight | null;
 }
 
 export interface RuleList {
@@ -31,8 +32,9 @@ export interface RuleList {
 }
 
 export function fetchThemeRulesFromServer(theme_id: number) {
-   return window.fetch(`/data/theme/${theme_id}/rules`)
-      .then(r => r.json())
+   return window
+      .fetch(`/data/theme/${theme_id}/rules`)
+      .then((r: Response) => r.json())
       .then((raw: RuleList) => raw);
 }
 
@@ -40,7 +42,9 @@ export function fetchThemeRulesFromServer(theme_id: number) {
  * The promise returns the id of the newly created theme
  */
 export function saveThemeOnServer(
-   theme_id: number, name: string, rules: ThemeRule[]
+   theme_id: number,
+   name: string,
+   rules: ThemeRule[]
 ) {
    const data = {
       name: name,
@@ -52,5 +56,5 @@ export function saveThemeOnServer(
 }
 
 export function deleteThemeOnServer(theme_id: number) {
-   return Server.post(`/data/theme/${theme_id}/delete`, undefined);
+   return Server.post(`/data/theme/${theme_id}/delete`);
 }
