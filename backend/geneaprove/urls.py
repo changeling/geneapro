@@ -8,6 +8,8 @@ import django.contrib
 from django.shortcuts import render_to_response
 from django.template.context_processors import csrf
 import django.views
+from graphene_django.views import GraphQLView
+from django.views.decorators.csrf import csrf_exempt
 from .views import events
 from .views import importers
 from .views import metadata
@@ -20,7 +22,7 @@ from .views import sources
 from .views import stats
 from .views import themelist
 import sys
-
+from backend.schema import schema
 
 def index(request):
     """
@@ -87,6 +89,10 @@ urlpatterns = [
     url(r'^data/repr/(?P<id>\d+)(?:/(?P<size>\d+))?$',
         representation.view),
     url(r'^data/quilts/(?P<id>\d+)$', quilts.QuiltsView.as_view()),
+
+    # GraphQL IDE
+    url(r'^graphql',  csrf_exempt(GraphQLView.as_view(graphiql=True, schema=schema))),
+    url(r'^graphql2',  csrf_exempt(GraphQLView.as_view(graphiql=False, schema=schema))),
 
     # Getting the CSRF token
     url(r'^data/csrf', send_csrf),

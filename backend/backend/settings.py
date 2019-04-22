@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
+    'graphene_django',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +59,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'backend.urls'
 
 GENEAPROVE_STATIC_ROOT = os.path.realpath(
-    os.path.join(BASE_DIR, "../dist"))
+    os.path.join(BASE_DIR, "../static"))
 
 TEMPLATES = [
     {
@@ -137,9 +139,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    GENEAPROVE_STATIC_ROOT
-]
+
+GRAPHENE = {
+    'SCHEMA': 'backend.schema',
+    'MIDDLEWARE': (
+        'graphene_django.debug.DjangoDebugMiddleware',
+    ),
+}
 
 class WithStacktrace(object):
     "https://blog.ionelmc.ro/2013/12/10/adding-stacktraces-to-log-messages/"
