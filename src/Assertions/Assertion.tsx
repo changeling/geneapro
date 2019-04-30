@@ -1,7 +1,6 @@
 import * as React from "react";
 import { GPDispatch, MetadataDict } from "../Store/State";
-import { Rating } from "semantic-ui-react";
-import { Segment } from "semantic-ui-react";
+import { Icon, Rating } from "semantic-ui-react";
 import { Assertion } from "../Store/Assertion";
 import AssertionPartEvent from "../Assertions/AssertionPartEvent";
 import AssertionPartPerson from "../Assertions/AssertionPartPerson";
@@ -23,32 +22,50 @@ const AssertionBox: React.FC<BoxProps> = (p) => {
    const source = a.sourceId ? p.entities.sources[a.sourceId] : undefined;
    const research = p.metadata.researchers_dict[a.researcher];
    return (
-      <div className={"Assertion " + (a.disproved ? "disproved" : "")}>
+      <div className={"Assertion2 " + (a.disproved ? "disproved" : "")}>
+          <div className="titlebar">
+             <div className="right">
+                {
+                   source &&
+                   <span>
+                      <SourceLink source={source} />
+                   </span>
+                }
+                <span
+                   title={`${research ? research.name : ''} -- ${a.lastChanged.toDateString()}`}
+                >
+                   <Icon name="user secret" />
+                </span>
+                <span>
+                   <Rating
+                      className="rating"
+                      rating={1} /* ??? Incorrect */
+                      size="mini"
+                      maxRating={5}
+                   />
+                </span>
+             </div>
+             <span className="summary">
+                {a.getSummary(p.metadata, p.entities)}
+             </span>
+             <span className="eventDate">
+                {a.getDate(p.entities.events)}
+             </span>
+          </div>
+
          {p.p1}
-         <div className="role">
+      {/*
+         <div className="eventRole">
             <span>{a.getRole(p.metadata)}</span>
          </div>
+         */}
          {p.p2}
-         <Segment attached={true} className="details">
-            <div className="right">
-               <div>
-                  <Rating
-                     className="rating"
-                     rating={1} /* ??? Incorrect */
-                     size="mini"
-                     maxRating={5}
-                  />
-               </div>
-               <div>{source && <SourceLink source={source} />}</div>
+
+         {a.rationale &&
+            <div className="rationale">
+               {a.rationale}
             </div>
-            <div className="preLine">
-               <i>Rationale:</i> {a.rationale}
-            </div>
-            <div className="researcher">
-               Research: {research ? research.name : ''}
-               &nbsp;({a.lastChanged.toDateString()})
-            </div>
-         </Segment>
+         }
       </div>
    );
 };
